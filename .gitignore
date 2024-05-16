@@ -1,3 +1,6 @@
+generated_folder/released/*
+generated_folder/test/*
+
 # General
 .DS_Store
 .AppleDouble
