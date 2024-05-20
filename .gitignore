@@ -1,3 +1,5 @@
+generated_folder/test/*
+generated_folder/released/*
 
 # General
 .DS_Store

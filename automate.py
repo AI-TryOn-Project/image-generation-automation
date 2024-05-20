@@ -87,11 +87,11 @@ def send_image(model_path, face_path, version,
     if response.status_code == 200 and 'application/json' in response.headers.get('Content-Type', ''):
         response_data = response.json()
         if response_data.get('status') == 'success' and 'image' in response_data:
-            image_data = base64.b64decode(response_data['image'])
-            image = Image.open(BytesIO(image_data))
-            generated_image_path = f'./generated_folder/{version}/{model_name}_{version}.png'
-            image.save(generated_image_path, format='PNG')
-            return generated_image_path
+            # image_data = base64.b64decode(response_data['image'])
+            # image = Image.open(BytesIO(image_data))
+            # generated_image_path = f'./generated_folder/{version}/{model_name}_{version}.png'
+            # image.save(generated_image_path, format='PNG')
+            return response_data['image']
     print(f'Failed to retrieve an image from {version} version.')
     print('Status Code:', response.status_code)
     print('Response:', response.text)
@@ -99,23 +99,30 @@ def send_image(model_path, face_path, version,
 
 def create_html(model_path, face_path, released_image_path, test_image_path, model_name):
     """Generate HTML content for a single comparison."""
+    face_base64 = encode_image_to_base64(face_path)
+    model_base64 = encode_image_to_base64(model_path)
+    # released_base64 = encode_image_to_base64(released_image_path)
+    # test_base64 = encode_image_to_base64(test_image_path)
+    released_base64 = released_image_path
+    test_base64 = test_image_path
+    
     return f"""
     <div class="image-row">
-        <div>
+        <div class="image-container">
             <h2>Face Image</h2>
-            <img src="{face_path}" alt="Face Image">
+            <img src="data:image/jpeg;base64,{face_base64}" alt="Face Image">
         </div>
-        <div>
+        <div class="image-container">
             <h2>Model Image</h2>
-            <img src="{model_path}" alt="Model Image">
+            <img src="data:image/jpeg;base64,{model_base64}" alt="Model Image">
         </div>
-        <div>
+        <div class="image-container">
             <h2>Generated Image (Released Version)</h2>
-            <img src="{released_image_path}" alt="Generated Image (Released)">
+            <img src="data:image/jpeg;base64,{released_base64}" alt="Generated Image (Released)">
         </div>
-        <div>
+        <div class="image-container">
             <h2>Generated Image (Test Version)</h2>
-            <img src="{test_image_path}" alt="Generated Image (Test)">
+            <img src="data:image/jpeg;base64,{test_base64}" alt="Generated Image (Test)">
         </div>
     </div>
     <hr>
@@ -180,11 +187,11 @@ def main(model_folder, face_path, prompt, age, bodyShape, ethnic, sex, skinColor
     
 
         if released_image_path and test_image_path:
-            face_path_ = f'../../{face_path}'
-            model_path = f'../../{model_path}'
-            released_image_path = f'../{str(Path(*Path(released_image_path).parts[-2:]))}'
-            test_image_path = f'../{str(Path(*Path(test_image_path).parts[-2:]))}'
-            print(model_path, released_image_path, test_image_path)
+            face_path_ = f'{face_path}'
+            model_path = f'{model_path}'
+            # released_image_path = f'{str(Path(*Path(released_image_path).parts[-3:]))}'
+            # test_image_path = f'{str(Path(*Path(test_image_path).parts[-3:]))}'
+            # print(model_path, released_image_path, test_image_path)
             html_content += create_html(model_path, face_path_, released_image_path, test_image_path, model_name)
         else:
             print(f'{model_path}: Failed to generate comparison due to missing images.')
@@ -199,16 +206,25 @@ def main(model_folder, face_path, prompt, age, bodyShape, ethnic, sex, skinColor
         file.write(html_content)
     print('HTML file created at ./generated_folder/comparison/model_face_comparison.html')
 
+
 if __name__ == '__main__': 
     model_folder = 'model_folder'
-    face_path = 'face_folder/000_yyqx.jpg'
+    # face_path = 'face_folder/000_yyqx.jpg'
     
-    prompt = 'street'
-    age = '20'
-    bodyShape = 'slim'
-    ethnic = 'asian'
-    sex = 'female'
-    skinColor = 'white'
+    # prompt = 'street'
+    # age = '20'
+    # bodyShape = 'slim'
+    # ethnic = 'asian'
+    # sex = 'female'
+    # skinColor = 'white'
+    # model_folder = input("Model Folder: ").strip()
+    face_path = input("Face Path (e.g., face_folder/000_yyqx.jpg): ").strip()
+    prompt = input("Prompt: ").strip()
+    age = input("Age: ").strip()
+    bodyShape = input("Body Shape: ").strip()
+    ethnic = input("Ethnic: ").strip()
+    sex = input("Sex: ").strip()
+    skinColor = input("Skin Color: ").strip()
     
                    
     main(model_folder, face_path, prompt, age, bodyShape, ethnic, sex, skinColor)
